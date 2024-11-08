@@ -15,21 +15,17 @@ import java.util.List;
 
 public class Teste {
     private static FarmaciaDao farmaciaDao = new FarmaciaDao(EMfactory.getEntityManager());
+
     public static void main(String[] args) throws Exception {
-        List<Farmaco> lista = new ArrayList<>();
-        lista.add(new Farmaco("RemedioTeste", "100mg"));
-        lista.add(new Farmaco("RemedioTeste2", "200mg"));
-        lista.add(new Farmaco("RemedioTeste3", "300mg"));
+        Medicamento medicamento = new Medicamento("Paracetamol", "SenacLab", Categoria.COMPRIMIDO);
 
+        Farmaco farmaco1 = new Farmaco("Paracetamol", "500mg", medicamento);
+        Farmaco farmaco2 = new Farmaco("Cafeína", "50mg", medicamento);
 
+        medicamento.adicionarFarmaco(farmaco1);
+        medicamento.adicionarFarmaco(farmaco2);
 
-
-
-
-        Medicamento medicamentoTeste = new Medicamento("medicamentoTeste", "SenacLab", lista, Categoria.CAPSULA);
-        for(Farmaco f : lista){
-            f.setMedicamento(medicamentoTeste);
-        }
-        farmaciaDao.inserir(medicamentoTeste);
+        farmaciaDao.inserir(medicamento);
+        farmaciaDao.buscar(1);
     }
 }

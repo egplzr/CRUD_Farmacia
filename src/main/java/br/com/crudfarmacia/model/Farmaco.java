@@ -1,27 +1,35 @@
 package br.com.crudfarmacia.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "farmacos")
 public class Farmaco {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name = "nome", nullable = false)
-    String nome;
+    private String nome;
 
     @Column(name = "peso", nullable = false)
-    String peso;
+    private String peso;
 
-    @ManyToMany
-    Medicamento medicamento;
+    @ManyToOne
+    @JoinColumn(name = "medicamento_id", nullable = false)
+    private Medicamento medicamento;
 
-    public Farmaco(String nome, String peso) {
+    public Farmaco(String nome, String peso, Medicamento medicamento) {
         this.nome = nome;
         this.peso = peso;
+        this.medicamento = medicamento;
     }
 }

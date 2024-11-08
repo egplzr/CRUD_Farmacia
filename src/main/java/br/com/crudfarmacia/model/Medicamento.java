@@ -1,35 +1,45 @@
 package br.com.crudfarmacia.model;
 
-
+import br.com.crudfarmacia.model.Categoria;
 import jakarta.persistence.*;
-import lombok.Data;
-
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "medicamentos")
 public class Medicamento {
     @Id
-            @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "nome", nullable = false)
-    String nome;
+    private String nome;
 
     @Column(name = "laboratorio", nullable = false)
-    String laboratorio;
+    private String laboratorio;
 
-    @OneToMany(mappedBy = "medicamento")
-    List<Farmaco> principioAtivo;
+    @OneToMany(mappedBy = "medicamento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Farmaco> principioAtivo = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    Categoria categoria;
+    private Categoria categoria;
 
-    public Medicamento(String nome, String laboratorio, List<Farmaco> principioAtivo, Categoria categoria) {
+    public Medicamento(String nome, String laboratorio, Categoria categoria) {
         this.nome = nome;
         this.laboratorio = laboratorio;
-        this.principioAtivo = principioAtivo;
         this.categoria = categoria;
+    }
+
+    public void adicionarFarmaco(Farmaco farmaco) {
+        farmaco.setMedicamento(this);
+        this.principioAtivo.add(farmaco);
     }
 }
