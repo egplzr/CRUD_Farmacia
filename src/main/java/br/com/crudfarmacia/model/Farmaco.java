@@ -1,8 +1,10 @@
 package br.com.crudfarmacia.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 @Table(name = "farmacos")
 public class Farmaco {
     @Id
@@ -15,28 +17,11 @@ public class Farmaco {
     @Column(name = "peso", nullable = false)
     String peso;
 
-    //Getters & Setters
-    public Long getId() {
-        return id;
-    }
+    @ManyToMany
+    Medicamento medicamento;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
+    public Farmaco(String nome, String peso) {
         this.nome = nome;
-    }
-
-    public String getPeso() {
-        return peso;
-    }
-
-    public void setPeso(String peso) {
         this.peso = peso;
     }
 }
