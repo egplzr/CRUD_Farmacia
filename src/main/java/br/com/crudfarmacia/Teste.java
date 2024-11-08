@@ -1,14 +1,32 @@
 package br.com.crudfarmacia;
 
 import br.com.crudfarmacia.model.Medicamento;
-import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public class Teste {
 
+    private static EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("farmaciaPU");
+    private static EntityManager entityManager = entityManagerFactory.createEntityManager();
+
     public static void main(String[] args) {
-        System.out.println("Running...");
+        try {
+            entityManager.getTransaction().begin();
+            Medicamento dipirona = entityManager.find(Medicamento.class, 1);
+            if (dipirona != null) {
+                System.out.println("Medicamento: " + dipirona.getNome());
+            } else {
+                System.out.println("Medicamento não encontrado.");
+            }
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            entityManager.getTransaction().rollback();
+        } finally {
+            entityManager.close();
+
+            entityManagerFactory.close();
+        }
     }
 }
