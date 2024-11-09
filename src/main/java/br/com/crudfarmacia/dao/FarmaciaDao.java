@@ -21,9 +21,19 @@ public class FarmaciaDao implements IDao<Medicamento>{
 
     @Override
     public void alterar(Medicamento objeto) throws Exception {
-        this.manager.merge(objeto);
-        this.manager.getTransaction().begin();
-        this.manager.getTransaction().commit();
+
+        objeto = this.buscar(objeto.getId());
+        if (objeto != null) {
+            this.manager.getTransaction().begin();
+            objeto.setNome(objeto.getNome());
+            objeto.setLaboratorio(objeto.getLaboratorio());
+            objeto.setCategoria(objeto.getCategoria());
+            objeto.setPrincipioAtivo(objeto.getPrincipioAtivo());
+            this.manager.merge(objeto);
+            this.manager.getTransaction().commit();
+        } else {
+            throw new Exception("Medicamento não encontrado para atualizar!");
+        }
     }
 
     @Override
@@ -44,4 +54,5 @@ public class FarmaciaDao implements IDao<Medicamento>{
         TypedQuery<Medicamento> query = this.manager.createQuery("select m from Medicamento m order by m.nome", Medicamento.class);
         return query.getResultList();
     }
+
 }

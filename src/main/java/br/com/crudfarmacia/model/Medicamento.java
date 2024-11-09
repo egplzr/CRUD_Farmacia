@@ -42,4 +42,20 @@ public class Medicamento {
         farmaco.setMedicamento(this);
         this.principioAtivo.add(farmaco);
     }
+
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("""
+                ------------------------------------------
+                MEDICAMENTO: %s
+                LABORATÓRIO: %s
+                CATEGORIA: %s
+                FÁRMACOS: %s
+                ------------------------------------------
+                """.formatted(this.getNome(), this.getLaboratorio(),
+                this.getCategoria(), this.principioAtivo.toString()));
+
+        String descricaoMedicamento = String.valueOf(s);
+        return descricaoMedicamento;
+    }
 }

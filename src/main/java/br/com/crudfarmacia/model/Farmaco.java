@@ -32,4 +32,9 @@ public class Farmaco {
         this.peso = peso;
         this.medicamento = medicamento;
     }
+
+    public String toString() {
+        String descricaoFarmaco = "%s: %s".formatted(this.getNome(), this.getPeso());
+        return descricaoFarmaco;
+    }
 }
