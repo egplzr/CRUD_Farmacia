@@ -1,72 +1,61 @@
 package br.com.crudfarmacia.model;
 
-
+import br.com.crudfarmacia.model.Categoria;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "medicamentos")
 public class Medicamento {
     @Id
-            @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "nome", nullable = false)
-    String nome;
+    private String nome;
 
     @Column(name = "laboratorio", nullable = false)
-    String laboratorio;
+    private String laboratorio;
 
-    @ManyToMany
-    @JoinTable(name = "medicamentos_farmacos",
-            joinColumns = @JoinColumn(name = "id_medicamento"),
-            inverseJoinColumns = @JoinColumn(name = "id_farmaco"))
-    List<Farmaco> principioAtivo;
+    @OneToMany(mappedBy = "medicamento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Farmaco> principioAtivo = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    Categoria categoria;
+    private Categoria categoria;
 
-    public Medicamento() {
-    }
-
-    //Getters & Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
+    public Medicamento(String nome, String laboratorio, Categoria categoria) {
         this.nome = nome;
-    }
-
-    public String getLaboratorio() {
-        return laboratorio;
-    }
-
-    public void setLaboratorio(String laboratorio) {
         this.laboratorio = laboratorio;
-    }
-
-    public List<Farmaco> getPrincipioAtivo() {
-        return principioAtivo;
-    }
-
-    public void setPrincipioAtivo(List<Farmaco> principioAtivo) {
-        this.principioAtivo = principioAtivo;
-    }
-
-    public Categoria getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public void adicionarFarmaco(Farmaco farmaco) {
+        farmaco.setMedicamento(this);
+        this.principioAtivo.add(farmaco);
+    }
+
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("""
+                ------------------------------------------
+                MEDICAMENTO: %s
+                LABORATÓRIO: %s
+                CATEGORIA: %s
+                FÁRMACOS: %s
+                ------------------------------------------
+                """.formatted(this.getNome(), this.getLaboratorio(),
+                this.getCategoria(), this.principioAtivo.toString()));
+
+        String descricaoMedicamento = String.valueOf(s);
+        return descricaoMedicamento;
     }
 }

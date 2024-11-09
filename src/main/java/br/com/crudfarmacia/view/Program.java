@@ -1,41 +1,36 @@
 package br.com.crudfarmacia.view;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 
 import javax.print.attribute.standard.JobHoldUntil;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
+
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.util.Arrays;
+import java.util.List;
 
+import br.com.crudfarmacia.dao.EMfactory;
+import br.com.crudfarmacia.dao.FarmaciaDao;
+import br.com.crudfarmacia.model.Categoria;
+import br.com.crudfarmacia.model.Farmaco;
+import br.com.crudfarmacia.model.Medicamento;
 import br.com.crudfarmacia.tablemodel.MedicamentoTableModel;
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
 
 import br.com.crudfarmacia.tablemodel.FarmacoTableModel;
 
@@ -50,7 +45,7 @@ public class Program extends JFrame {
 	private JTextField txtNomeCadastrarMedicamento;
 	private JTextField txtLaboratorioCadastrarMedicamento;
 	private JLabel lblCategoriaCadastrarMedicamento;
-	private JComboBox<String> cmbCategoriasCadastrarMedicamento;
+	private JComboBox<Categoria> cmbCategoriasCadastrarMedicamento;
 	private JTextField txtNomeFarmacoCadastrar;
 	private JTextField txtPesoFarmacoCadastrar;
 	private JScrollPane painelTabelaFarmacoCadastrar;
@@ -59,9 +54,14 @@ public class Program extends JFrame {
 	private JButton btnCadastrarMedicamento;
 	private JButton btnLimparDadosMedicamento;
 	private JButton btnExcluirMedicameno;
-	
+
 	private JScrollPane painelListagem;
 	private JTable tblListagemMedicamento;
+
+	private Medicamento medicamento;
+	private static FarmaciaDao dao = new FarmaciaDao(EMfactory.getEntityManager());
+	private List<Farmaco> farmacosMedicamento;
+	private List<Medicamento> medicamentos;
 
 	public Program() {
 		components();
@@ -88,25 +88,31 @@ public class Program extends JFrame {
 		mnuMedicamento = new JMenu("Medicamentos");
 		itemListagemMedicamento = new JMenuItem("Listar Medicamentos");
 
-		//Painel cadastrar medicamentos
+		// Painel cadastrar medicamentos
 		painelCadastrarMedicamento = criarPainel();
 		painelCadastrarMedicamento.setVisible(true);
-		
-		txtNomeCadastrarMedicamento = criarJTextField("Medicamento", 50, 60, 390, 40);
 
-		txtLaboratorioCadastrarMedicamento = criarJTextField("Laboratório" , 50, 140, 390, 40);
-		
+		txtNomeCadastrarMedicamento = criarJTextField("Medicamento (pressione ENTER para pesquisar)", 50, 60, 390, 40);
+
+		txtLaboratorioCadastrarMedicamento = criarJTextField("Laboratório", 50, 140, 390, 40);
+
 		lblCategoriaCadastrarMedicamento = criarJLabel("Categoria", 50, 220, 100, 40);
 		cmbCategoriasCadastrarMedicamento = new JComboBox();
 		cmbCategoriasCadastrarMedicamento.setBounds(130, 220, 150, 40);
-		
-		txtNomeFarmacoCadastrar = criarJTextField("Fármaco",50, 420, 590, 40);
+
+		Categoria[] categorias = { Categoria.COMPRIMIDO, Categoria.CAPSULA, Categoria.POMADA, Categoria.XAROPE };
+
+		cmbCategoriasCadastrarMedicamento.setModel(new DefaultComboBoxModel<>(categorias));
+		cmbCategoriasCadastrarMedicamento.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
+
+		txtNomeFarmacoCadastrar = criarJTextField("Fármaco", 50, 420, 590, 40);
 		txtPesoFarmacoCadastrar = criarJTextField("Peso(mg)", 660, 420, 100, 40);
 		painelTabelaFarmacoCadastrar = new JScrollPane();
-		painelTabelaFarmacoCadastrar.setBounds(470, 60, 460,290);
+		painelTabelaFarmacoCadastrar.setBounds(470, 60, 460, 290);
 		painelTabelaFarmacoCadastrar.setBackground(Color.black);
 
 		tblFarmacosCadastro = new JTable();
+		tblFarmacosCadastro.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		painelTabelaFarmacoCadastrar.getViewport().add(tblFarmacosCadastro);
 		tblFarmacosCadastro.setModel(new FarmacoTableModel(new ArrayList<>()));
@@ -137,17 +143,84 @@ public class Program extends JFrame {
 		painelCadastrarMedicamento.add(txtLaboratorioCadastrarMedicamento);
 		painelCadastrarMedicamento.add(txtNomeCadastrarMedicamento);
 
-		//Actions
+		// Actions
 
 		itemListagemMedicamento.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(painelListagem.isVisible()){
+				if (painelListagem.isVisible()) {
 					painelListagem.setVisible(false);
-				}else{
+				} else {
 					painelListagem.setVisible(true);
+
+					try {
+						medicamentos = dao.listar();
+						tblListagemMedicamento.setModel(new MedicamentoTableModel(medicamentos));
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						JOptionPane.showMessageDialog(null, "Não foi possível listar os medicamentos");
+					}
 				}
 			}
+		});
+
+		txtNomeCadastrarMedicamento.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					String nomeMedicamento = txtNomeCadastrarMedicamento.getText();
+
+					try {
+						medicamento = dao.buscar(nomeMedicamento);
+						preencherCampos(medicamento);
+					} catch (Exception ex) {
+						JOptionPane.showMessageDialog(null, "Usuário não encontrado");
+						ex.printStackTrace();
+					}
+				} else {
+
+				}
+
+			}
+		});
+
+		tblListagemMedicamento.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				int linha = tblListagemMedicamento.getSelectedRow();
+
+				if (linha >= 0) {
+					medicamento = medicamentos.get(linha);
+					preencherCampos(medicamento);
+				}
+			}
+
+		});
+
+		btnSalvarFarmaco.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String nome = txtNomeFarmacoCadastrar.getText();
+				String strPeso = txtPesoFarmacoCadastrar.getText().replace(".", ",");
+
+				try {
+					double peso = Double.parseDouble(txtPesoFarmacoCadastrar.getText());
+					strPeso = String.format("%.2fmg", peso);
+					farmacosMedicamento.add(new Farmaco(nome, strPeso, medicamento));
+					tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacosMedicamento));
+					txtPesoFarmacoCadastrar.setText("");
+					txtNomeFarmacoCadastrar.setText("");
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null, "Informe informações válidas!", "ERRO",
+							JOptionPane.ERROR_MESSAGE);
+
+				}
+
+			}
+
 		});
 
 		// adicionando components
@@ -178,7 +251,7 @@ public class Program extends JFrame {
 		int widthTela = getWidth();
 		int widthCentralizado = (widthTela - widthComponent) / 2;
 	}
-	
+
 	private JTextField criarJTextField(String placeholder, int dEsq, int dTopo, int width, int heigth) {
 		JTextField tf = new JTextField();
 		tf.setBounds(dEsq, dTopo, width, heigth);
@@ -189,7 +262,7 @@ public class Program extends JFrame {
 		tf.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				if(tf.getText().equals(placeholder)){
+				if (tf.getText().equals(placeholder)) {
 					tf.setText("");
 					tf.setForeground(Color.black);
 				}
@@ -197,16 +270,33 @@ public class Program extends JFrame {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				if(tf.getText().equals("")){
+				if (tf.getText().equals("")) {
 					tf.setText(placeholder);
 					tf.setForeground(Color.gray);
 				}
 			}
 		});
 
+		tf.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				tf.setForeground(Color.black);
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+
+			}
+		});
+
 		return tf;
 	}
-	
+
 	private JLabel criarJLabel(String txt, int dEsq, int dTopo, int width, int heigth) {
 		JLabel lbl = new JLabel(txt);
 		lbl.setBounds(dEsq, dTopo, width, heigth);
@@ -217,11 +307,23 @@ public class Program extends JFrame {
 
 	}
 
-	private JButton criarButton(String txt, int dEsq, int dTopo, int width, int heigth){
+	private JButton criarButton(String txt, int dEsq, int dTopo, int width, int heigth) {
 		JButton b = new JButton(txt);
 		b.setBounds(dEsq, dTopo, width, heigth);
 		b.setCursor(new Cursor(HAND_CURSOR));
 		b.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
 		return b;
+	}
+
+	private void preencherCampos(Medicamento m) {
+		if (medicamento != null) {
+			painelListagem.setVisible(false);
+			txtNomeCadastrarMedicamento.setText(m.getNome());
+			txtLaboratorioCadastrarMedicamento.setText(m.getLaboratorio());
+			cmbCategoriasCadastrarMedicamento.setSelectedItem(m.getCategoria());
+			farmacosMedicamento = m.getPrincipioAtivo();
+			tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacosMedicamento));
+		}
+
 	}
 }

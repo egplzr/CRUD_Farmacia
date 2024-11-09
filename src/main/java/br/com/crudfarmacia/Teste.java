@@ -1,5 +1,7 @@
 package br.com.crudfarmacia;
 
+import javax.swing.JOptionPane;
+
 import br.com.crudfarmacia.model.Medicamento;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -14,18 +16,19 @@ public class Teste {
         try {
             entityManager.getTransaction().begin();
             Medicamento dipirona = entityManager.find(Medicamento.class, 1);
+
             if (dipirona != null) {
                 System.out.println("Medicamento: " + dipirona.getNome());
             } else {
                 System.out.println("Medicamento não encontrado.");
             }
+            
             entityManager.getTransaction().commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "ERRO: " + e.getMessage(), "ERRO", 0);
             entityManager.getTransaction().rollback();
         } finally {
             entityManager.close();
-
             entityManagerFactory.close();
         }
     }

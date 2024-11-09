@@ -4,13 +4,14 @@
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
              http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
              version="2.2">
-    <persistence-unit name="farmaciaPU">
-        <provider>org.hibernate.jpa.HibernatePersistence</provider>
+    <persistence-unit name="farmaciaPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>
-            <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://db-crudfarmacia.mysql.database.azure.com:3306/db-farmaciacrud?sslMode=require" />
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://db-crudfarmacia.mysql.database.azure.com:3306/farmaciadb?sslMode=require" />
             <property name="javax.persistence.jdbc.user" value="rootenzo" />
             <property name="javax.persistence.jdbc.password" value="FarmaciaServer749" />
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect" />
         </properties>
     </persistence-unit>
