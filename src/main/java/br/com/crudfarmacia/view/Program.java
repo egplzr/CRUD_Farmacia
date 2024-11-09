@@ -2,57 +2,66 @@ package br.com.crudfarmacia.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
 
+import javax.print.attribute.standard.JobHoldUntil;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.MaskFormatter;
+import javax.swing.text.NumberFormatter;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Font;
 
+import br.com.crudfarmacia.tablemodel.MedicamentoTableModel;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+
+import br.com.crudfarmacia.tablemodel.FarmacoTableModel;
 
 public class Program extends JFrame {
 	private JPanel fundo;
+
 	private JMenuBar mnubar;
 	private JMenu mnuMedicamento;
-	private JMenuItem itemCadastrarMedicamento;
-	private JMenuItem itemListarMedicamento;
-	private JMenuItem itemExcluirMedicamento;
-	private JMenuItem itemAlterarNMedicamento;
+	private JMenuItem itemListagemMedicamento;
 
 	private JPanel painelCadastrarMedicamento;
-	private JLabel lblNomeCadastrarMedicamento;
 	private JTextField txtNomeCadastrarMedicamento;
-	private JLabel lblLaboratorioCadastrarMedicamento;
 	private JTextField txtLaboratorioCadastrarMedicamento;
 	private JLabel lblCategoriaCadastrarMedicamento;
 	private JComboBox<String> cmbCategoriasCadastrarMedicamento;
-	//TODO Verificar qual tipo sera utilizado para representar os farmacos
-	private JComboBox<String> cmbFarmacosCadastrarMedicamento;
+	private JTextField txtNomeFarmacoCadastrar;
+	private JTextField txtPesoFarmacoCadastrar;
+	private JScrollPane painelTabelaFarmacoCadastrar;
+	private JTable tblFarmacosCadastro;
+	private JButton btnSalvarFarmaco;
+	private JButton btnCadastrarMedicamento;
+	private JButton btnLimparDadosMedicamento;
+	private JButton btnExcluirMedicameno;
 	
-	private JPanel painelListarMedicamento;
-	private JPanel painelExcluirMedicamento;
-	private JPanel painelAlterarMedicamento;
-
-	private JMenu mnuFarmaco;
-	private JMenuItem itemCadastrarFarmaco;
-	private JMenuItem itemListarFarmaco;
-	private JMenuItem itemExcluirFarmaco;
-	private JMenuItem itemAlterarFarmaco;
-
-	private JPanel painelCadastrarFarmaco;
-	private JPanel painelListarFarmaco;
-	private JPanel painelExcluirFarmaco;
-	private JPanel painelAlterarFarmaco;
+	private JScrollPane painelListagem;
+	private JTable tblListagemMedicamento;
 
 	public Program() {
 		components();
@@ -76,83 +85,68 @@ public class Program extends JFrame {
 		mnubar = new JMenuBar();
 		mnubar.setBounds(0, 0, fundo.getWidth(), 30);
 
-		//															AREA MEDICAMENTOS
 		mnuMedicamento = new JMenu("Medicamentos");
+		itemListagemMedicamento = new JMenuItem("Listar Medicamentos");
 
-		itemCadastrarMedicamento = new JMenuItem("Cadastrar");
-		itemAlterarNMedicamento = new JMenuItem("Alterar");
-		itemExcluirMedicamento = new JMenuItem("Excluir");
-		itemListarMedicamento = new JMenuItem("Listar");
-		
 		//Painel cadastrar medicamentos
 		painelCadastrarMedicamento = criarPainel();
 		painelCadastrarMedicamento.setVisible(true);
 		
-		lblNomeCadastrarMedicamento = criarJLabel("Nome do medicamento", 50, 50, 200, 40);
-		txtNomeCadastrarMedicamento = criarJTextField(50, 100, 880, 40);
+		txtNomeCadastrarMedicamento = criarJTextField("Medicamento", 50, 60, 390, 40);
+
+		txtLaboratorioCadastrarMedicamento = criarJTextField("Laboratório" , 50, 140, 390, 40);
 		
-		lblLaboratorioCadastrarMedicamento = criarJLabel("Nome do laboratório", 50 , 160, 200, 40);
-		txtLaboratorioCadastrarMedicamento = criarJTextField(50, 210, 880, 40);
-		
-		lblCategoriaCadastrarMedicamento = criarJLabel("Categoria", 50, 270, 100, 40);
+		lblCategoriaCadastrarMedicamento = criarJLabel("Categoria", 50, 220, 100, 40);
 		cmbCategoriasCadastrarMedicamento = new JComboBox();
-		cmbCategoriasCadastrarMedicamento.setBounds(130, 270, 200, 40);
-		//TODO finalizar o front do painelCadastroMedicamento
+		cmbCategoriasCadastrarMedicamento.setBounds(130, 220, 150, 40);
 		
+		txtNomeFarmacoCadastrar = criarJTextField("Fármaco",50, 420, 590, 40);
+		txtPesoFarmacoCadastrar = criarJTextField("Peso(mg)", 660, 420, 100, 40);
+		painelTabelaFarmacoCadastrar = new JScrollPane();
+		painelTabelaFarmacoCadastrar.setBounds(470, 60, 460,290);
+		painelTabelaFarmacoCadastrar.setBackground(Color.black);
+
+		tblFarmacosCadastro = new JTable();
+
+		painelTabelaFarmacoCadastrar.getViewport().add(tblFarmacosCadastro);
+		tblFarmacosCadastro.setModel(new FarmacoTableModel(new ArrayList<>()));
+
+		btnSalvarFarmaco = criarButton("Salvar farmaco", 780, 420, 150, 40);
+
+		btnCadastrarMedicamento = criarButton("Salvar", 50, 310, 100, 40);
+		btnExcluirMedicameno = criarButton("Excluir", 170, 310, 100, 40);
+		btnLimparDadosMedicamento = criarButton("Limpar", 290, 310, 100, 40);
+
+		painelListagem = new JScrollPane();
+		painelListagem.setBounds(fundo.getWidth() / 2, 30, fundo.getWidth() / 2, fundo.getHeight() - 30);
+		tblListagemMedicamento = new JTable(new MedicamentoTableModel(new ArrayList<>()));
+		painelListagem.setVisible(false);
+
+		painelListagem.getViewport().add(tblListagemMedicamento);
+
+		painelCadastrarMedicamento.add(painelListagem);
+		painelCadastrarMedicamento.add(btnLimparDadosMedicamento);
+		painelCadastrarMedicamento.add(btnExcluirMedicameno);
+		painelCadastrarMedicamento.add(btnCadastrarMedicamento);
+		painelCadastrarMedicamento.add(btnSalvarFarmaco);
+		painelCadastrarMedicamento.add(painelTabelaFarmacoCadastrar);
+		painelCadastrarMedicamento.add(txtPesoFarmacoCadastrar);
+		painelCadastrarMedicamento.add(txtNomeFarmacoCadastrar);
 		painelCadastrarMedicamento.add(cmbCategoriasCadastrarMedicamento);
 		painelCadastrarMedicamento.add(lblCategoriaCadastrarMedicamento);
 		painelCadastrarMedicamento.add(txtLaboratorioCadastrarMedicamento);
-		painelCadastrarMedicamento.add(lblLaboratorioCadastrarMedicamento);
 		painelCadastrarMedicamento.add(txtNomeCadastrarMedicamento);
-		painelCadastrarMedicamento.add(lblNomeCadastrarMedicamento);
-		
-		painelListarMedicamento = criarPainel();
-		painelExcluirMedicamento = criarPainel();
-		painelAlterarMedicamento = criarPainel();
 
-		// area farmacos
-		mnuFarmaco = new JMenu("Farmacos");
+		//Actions
 
-		itemAlterarFarmaco = new JMenuItem("Alterar");
-		itemCadastrarFarmaco = new JMenuItem("Cadastrar");
-		itemExcluirFarmaco = new JMenuItem("Excluir");
-		itemListarFarmaco = new JMenuItem("Listar");
-
-		// action listenners
-
-		itemCadastrarMedicamento.addActionListener(new ActionListener() {
-
+		itemListagemMedicamento.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setarFoco(painelCadastrarMedicamento);
-
-			}
-		});
-
-		itemExcluirMedicamento.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setarFoco(painelExcluirMedicamento);
-
-			}
-		});
-
-		itemAlterarNMedicamento.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setarFoco(painelAlterarMedicamento);
-
-			}
-		});
-
-		itemListarMedicamento.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setarFoco(painelListarMedicamento);
-
+				if(painelListagem.isVisible()){
+					painelListagem.setVisible(false);
+				}else{
+					painelListagem.setVisible(true);
+				}
 			}
 		});
 
@@ -160,27 +154,9 @@ public class Program extends JFrame {
 		getContentPane().add(fundo);
 		fundo.add(mnubar);
 		fundo.add(painelCadastrarMedicamento);
-		fundo.add(painelListarMedicamento);
-		fundo.add(painelAlterarMedicamento);
-		fundo.add(painelExcluirMedicamento);
-		fundo.add(itemAlterarFarmaco);
-		fundo.add(itemCadastrarFarmaco);
-		fundo.add(itemExcluirFarmaco);
-		fundo.add(itemListarFarmaco);
 
 		mnubar.add(mnuMedicamento);
-		mnubar.add(mnuFarmaco);
-
-		mnuMedicamento.add(itemCadastrarMedicamento);
-		mnuMedicamento.add(itemExcluirMedicamento);
-		mnuMedicamento.add(itemListarMedicamento);
-		mnuMedicamento.add(itemAlterarNMedicamento);
-
-		mnuFarmaco.add(itemCadastrarFarmaco);
-		mnuFarmaco.add(itemExcluirFarmaco);
-		mnuFarmaco.add(itemListarFarmaco);
-		mnuFarmaco.add(itemAlterarFarmaco);
-
+		mnuMedicamento.add(itemListagemMedicamento);
 		setVisible(true);
 	}
 
@@ -202,22 +178,33 @@ public class Program extends JFrame {
 		int widthTela = getWidth();
 		int widthCentralizado = (widthTela - widthComponent) / 2;
 	}
-
-	private void setarFoco(JComponent c) {
-		for (Component c1 : fundo.getComponents()) {
-			if (!c1.equals(c) && c1.getClass() == JPanel.class) {
-				c1.setVisible(false);
-			}
-		}
-
-		c.setVisible(true);
-	}
 	
-	private JTextField criarJTextField(int dEsq, int dTopo, int width, int heigth) {
-		JTextField txt = new JTextField();
-		txt.setBounds(dEsq, dTopo, width, heigth);
-		txt.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
-		return txt;
+	private JTextField criarJTextField(String placeholder, int dEsq, int dTopo, int width, int heigth) {
+		JTextField tf = new JTextField();
+		tf.setBounds(dEsq, dTopo, width, heigth);
+		tf.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
+		tf.setText(placeholder);
+		tf.setForeground(Color.gray);
+
+		tf.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				if(tf.getText().equals(placeholder)){
+					tf.setText("");
+					tf.setForeground(Color.black);
+				}
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				if(tf.getText().equals("")){
+					tf.setText(placeholder);
+					tf.setForeground(Color.gray);
+				}
+			}
+		});
+
+		return tf;
 	}
 	
 	private JLabel criarJLabel(String txt, int dEsq, int dTopo, int width, int heigth) {
@@ -225,8 +212,16 @@ public class Program extends JFrame {
 		lbl.setBounds(dEsq, dTopo, width, heigth);
 		lbl.setOpaque(true);
 		lbl.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
+
 		return lbl;
 
 	}
 
+	private JButton criarButton(String txt, int dEsq, int dTopo, int width, int heigth){
+		JButton b = new JButton(txt);
+		b.setBounds(dEsq, dTopo, width, heigth);
+		b.setCursor(new Cursor(HAND_CURSOR));
+		b.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
+		return b;
+	}
 }
