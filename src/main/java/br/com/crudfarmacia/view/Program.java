@@ -42,6 +42,7 @@ public class Program extends JFrame {
 	private JMenuItem itemListagemMedicamento;
 
 	private JPanel painelCadastrarMedicamento;
+	private JTextField txtIdMedicamento;
 	private JTextField txtNomeCadastrarMedicamento;
 	private JTextField txtLaboratorioCadastrarMedicamento;
 	private JLabel lblCategoriaCadastrarMedicamento;
@@ -54,15 +55,14 @@ public class Program extends JFrame {
 	private JButton btnCadastrarMedicamento;
 	private JButton btnLimparDadosMedicamento;
 	private JButton btnExcluirMedicameno;
-
+	private List<Farmaco> farmacos = new ArrayList<>();
 	private JScrollPane painelListagem;
 	private JTable tblListagemMedicamento;
-
 	private Medicamento medicamento;
 	private static FarmaciaDao dao = new FarmaciaDao(EMfactory.getEntityManager());
-	private List<Farmaco> farmacosMedicamento;
 	private List<Medicamento> medicamentos;
 
+	// TODO arrumar a lógica do cadastro
 	public Program() {
 		components();
 	}
@@ -74,6 +74,8 @@ public class Program extends JFrame {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+
+		medicamento = new Medicamento();
 
 		setResizable(false);
 		setSize(1000, 600);
@@ -92,7 +94,10 @@ public class Program extends JFrame {
 		painelCadastrarMedicamento = criarPainel();
 		painelCadastrarMedicamento.setVisible(true);
 
-		txtNomeCadastrarMedicamento = criarJTextField("Medicamento (pressione ENTER para pesquisar)", 50, 60, 390, 40);
+		txtIdMedicamento = criarJTextField("Id", 50, 60, 50, 40);
+		txtIdMedicamento.setEnabled(false);
+
+		txtNomeCadastrarMedicamento = criarJTextField("Medicamento (pressione ENTER para pesquisar)", 120, 60, 320, 40);
 
 		txtLaboratorioCadastrarMedicamento = criarJTextField("Laboratório", 50, 140, 390, 40);
 
@@ -117,15 +122,16 @@ public class Program extends JFrame {
 		painelTabelaFarmacoCadastrar.getViewport().add(tblFarmacosCadastro);
 		tblFarmacosCadastro.setModel(new FarmacoTableModel(new ArrayList<>()));
 
-		btnSalvarFarmaco = criarButton("Salvar farmaco", 780, 420, 150, 40);
+		btnSalvarFarmaco = criarButton("Salvar Fármaco", 780, 420, 150, 40);
 
 		btnCadastrarMedicamento = criarButton("Salvar", 50, 310, 100, 40);
 		btnExcluirMedicameno = criarButton("Excluir", 170, 310, 100, 40);
 		btnLimparDadosMedicamento = criarButton("Limpar", 290, 310, 100, 40);
 
 		painelListagem = new JScrollPane();
-		painelListagem.setBounds(fundo.getWidth() / 2, 30, fundo.getWidth() / 2, fundo.getHeight() - 30);
+		painelListagem.setBounds(0, 30, fundo.getWidth() / 2, fundo.getHeight() - 30);
 		tblListagemMedicamento = new JTable(new MedicamentoTableModel(new ArrayList<>()));
+		tblListagemMedicamento.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		painelListagem.setVisible(false);
 
 		painelListagem.getViewport().add(tblListagemMedicamento);
@@ -142,7 +148,7 @@ public class Program extends JFrame {
 		painelCadastrarMedicamento.add(lblCategoriaCadastrarMedicamento);
 		painelCadastrarMedicamento.add(txtLaboratorioCadastrarMedicamento);
 		painelCadastrarMedicamento.add(txtNomeCadastrarMedicamento);
-
+		painelCadastrarMedicamento.add(txtIdMedicamento);
 		// Actions
 
 		itemListagemMedicamento.addActionListener(new ActionListener() {
@@ -157,7 +163,6 @@ public class Program extends JFrame {
 						medicamentos = dao.listar();
 						tblListagemMedicamento.setModel(new MedicamentoTableModel(medicamentos));
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
 						JOptionPane.showMessageDialog(null, "Não foi possível listar os medicamentos");
 					}
 				}
@@ -173,7 +178,7 @@ public class Program extends JFrame {
 
 					try {
 						medicamento = dao.buscar(nomeMedicamento);
-						preencherCampos(medicamento);
+						preencherCampos();
 					} catch (Exception ex) {
 						JOptionPane.showMessageDialog(null, "Usuário não encontrado");
 						ex.printStackTrace();
@@ -193,7 +198,7 @@ public class Program extends JFrame {
 
 				if (linha >= 0) {
 					medicamento = medicamentos.get(linha);
-					preencherCampos(medicamento);
+					preencherCampos();
 				}
 			}
 
@@ -204,21 +209,185 @@ public class Program extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String nome = txtNomeFarmacoCadastrar.getText();
-				String strPeso = txtPesoFarmacoCadastrar.getText().replace(".", ",");
+				String strPeso = txtPesoFarmacoCadastrar.getText().replace(",", ".");
 
-				try {
-					double peso = Double.parseDouble(txtPesoFarmacoCadastrar.getText());
-					strPeso = String.format("%.2fmg", peso);
-					farmacosMedicamento.add(new Farmaco(nome, strPeso, medicamento));
-					tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacosMedicamento));
-					txtPesoFarmacoCadastrar.setText("");
-					txtNomeFarmacoCadastrar.setText("");
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(null, "Informe informações válidas!", "ERRO",
-							JOptionPane.ERROR_MESSAGE);
+				if(txtNomeCadastrarMedicamento.getText().equals("Medicamento (pressione ENTER para pesquisar)")
+				&& txtLaboratorioCadastrarMedicamento.getText().equals("Laboratório")){
+					JOptionPane.showMessageDialog(null, "Selecione ou preencha os dados do medicamento primeiro!");;
+				}else{
+					try {
+						double peso = Double.parseDouble(strPeso);
+						strPeso = String.format("%.2fmg", peso);
+	
+						if (contemFarmaco(nome)) {
+							for (int i = 0; i < farmacos.size(); i++) {
+								if (farmacos.get(i).getNome().equals(nome)) {
+									farmacos.get(i).setNome(nome);
+									farmacos.get(i).setPeso(strPeso);
+								}
+							}
+						} else {
+							Farmaco farmaco = new Farmaco(nome, strPeso, medicamento);
+							farmacos.add(farmaco);
+						}
+	
+						tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacos));
+	
+						txtNomeFarmacoCadastrar.setText("Fármaco");
+						txtNomeFarmacoCadastrar.setForeground(Color.gray);
+						txtPesoFarmacoCadastrar.setText("Peso(mg)");
+						txtPesoFarmacoCadastrar.setForeground(Color.gray);
+	
+					} catch (Exception ex) {
+						JOptionPane.showMessageDialog(null, "Digite informações válidas!", "ERRO",
+								JOptionPane.ERROR_MESSAGE);
+						ex.printStackTrace();
+	
+					}
+				}
+				
 
+			}
+
+		});
+
+		tblFarmacosCadastro.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				int linha = tblFarmacosCadastro.getSelectedRow();
+
+				if (linha >= 0) {
+					Farmaco f = farmacos.get(linha);
+					txtNomeFarmacoCadastrar.setText(f.getNome());
+					txtPesoFarmacoCadastrar.setText(f.getPeso().replace("mg", ""));
+
+					tblFarmacosCadastro.addKeyListener(new KeyListener() {
+
+						@Override
+						public void keyTyped(KeyEvent e) {
+							// TODO Auto-generated method stub
+							throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
+						}
+
+						@Override
+						public void keyPressed(KeyEvent e) {
+							if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+								for (int i = 0; i < farmacos.size(); i++) {
+									if (farmacos.get(i).getNome().equals(f.getNome())) {
+										farmacos.remove(i);
+										tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacos));
+										txtNomeFarmacoCadastrar.setText("");
+										txtPesoFarmacoCadastrar.setText("");
+										break;
+									}
+								}
+							}
+						}
+
+						@Override
+						public void keyReleased(KeyEvent e) {
+							// TODO Auto-generated method stub
+							throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
+						}
+
+					});
 				}
 
+			}
+
+		});
+
+		btnCadastrarMedicamento.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String nome = txtNomeCadastrarMedicamento.getText();
+				String laboratorio = txtLaboratorioCadastrarMedicamento.getText();
+				Categoria categoria = (Categoria) cmbCategoriasCadastrarMedicamento.getSelectedItem();
+				String id = txtIdMedicamento.getText();
+
+				if (!nome.equals("Medicamento (pressione ENTER para pesquisar)")
+						&& !laboratorio.equals("Laboratório")) {
+					if (farmacos.size() == 0) {
+						JOptionPane.showMessageDialog(null, "Adicione ao menos 1 farmaco para salvar");
+					} else {
+						if (id.equals("") || id.equals("Id")) {
+							System.out.println("Novo medicamento");
+							try {
+								medicamento.setNome(nome);
+								medicamento.setCategoria(categoria);
+								medicamento.setLaboratorio(laboratorio);
+								medicamento.setPrincipioAtivo(farmacos);
+								dao.inserir(medicamento);
+								limpar();
+								medicamento = new Medicamento();
+								farmacos = new ArrayList<>();
+
+							} catch (Exception e1) {
+								JOptionPane.showMessageDialog(null,
+										"Não foi possível cadastrar o medicamento\nERRO: " + e1.getMessage(), "ERRO",
+										JOptionPane.ERROR_MESSAGE);
+							}
+						} else {
+							try {
+								medicamento = dao.buscar(Long.parseLong(id));
+								medicamento.setNome(nome);
+								medicamento.setCategoria(categoria);
+								medicamento.setLaboratorio(laboratorio);
+								medicamento.setPrincipioAtivo(farmacos);
+								dao.alterar(medicamento);
+								limpar();
+								medicamento = new Medicamento();
+								farmacos = new ArrayList<>();
+
+							} catch (Exception e1) {
+								JOptionPane.showMessageDialog(null, "Não foi possível atualizar o medicamento");
+							}
+							try {
+								tblListagemMedicamento.setModel(new MedicamentoTableModel(dao.listar()));
+							} catch (Exception e1) {
+								e1.printStackTrace();
+							}
+
+						}
+					}
+
+				} else {
+					JOptionPane.showMessageDialog(null, "Preencha os campos vazios!");
+				}
+
+			}
+		});
+
+		btnLimparDadosMedicamento.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				limpar();
+			}
+
+		});
+
+		btnExcluirMedicameno.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String id = txtIdMedicamento.getText();
+
+				if (id.equals("") || id.equals("Id")) {
+					JOptionPane.showMessageDialog(null, "Selecione um medicamento ta tabela para excluir");
+				} else {
+					try {
+						dao.excluir(Long.parseLong(id));
+						limpar();
+						medicamento = new Medicamento();
+						farmacos = new ArrayList<>();
+						tblListagemMedicamento.setModel(new MedicamentoTableModel(dao.listar()));
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(null, "Não foi possível excluir o medicamento");
+					}
+				}
 			}
 
 		});
@@ -315,15 +484,47 @@ public class Program extends JFrame {
 		return b;
 	}
 
-	private void preencherCampos(Medicamento m) {
+	private void preencherCampos() {
 		if (medicamento != null) {
 			painelListagem.setVisible(false);
-			txtNomeCadastrarMedicamento.setText(m.getNome());
-			txtLaboratorioCadastrarMedicamento.setText(m.getLaboratorio());
-			cmbCategoriasCadastrarMedicamento.setSelectedItem(m.getCategoria());
-			farmacosMedicamento = m.getPrincipioAtivo();
-			tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacosMedicamento));
+			txtIdMedicamento.setText(String.format("%d", medicamento.getId()));
+			txtNomeCadastrarMedicamento.setText(medicamento.getNome());
+			txtLaboratorioCadastrarMedicamento.setText(medicamento.getLaboratorio());
+			cmbCategoriasCadastrarMedicamento.setSelectedItem(medicamento.getCategoria());
+			farmacos = medicamento.getPrincipioAtivo();
+			tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacos));
 		}
 
+	}
+
+	private boolean contemFarmaco(String nome) {
+		for (Farmaco f : farmacos) {
+			if (f.getNome().equals(nome)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private void limpar() {
+		txtNomeCadastrarMedicamento.setText("Medicamento (pressione ENTER para pesquisar)");
+		txtNomeCadastrarMedicamento.setForeground(Color.gray);
+
+		txtIdMedicamento.setText("Id");
+
+		txtLaboratorioCadastrarMedicamento.setText("Laboratório");
+		txtLaboratorioCadastrarMedicamento.setForeground(Color.gray);
+
+		txtNomeFarmacoCadastrar.setText("Fármaco");
+		txtNomeFarmacoCadastrar.setForeground(Color.gray);
+
+		txtPesoFarmacoCadastrar.setText("Peso(mg)");
+		txtPesoFarmacoCadastrar.setForeground(Color.gray);
+
+		medicamento = new Medicamento();
+		farmacos = new ArrayList<>();
+
+		tblFarmacosCadastro.setModel(new FarmacoTableModel(new ArrayList<>()));
 	}
 }

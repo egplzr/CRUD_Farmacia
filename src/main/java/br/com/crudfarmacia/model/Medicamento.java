@@ -43,6 +43,14 @@ public class Medicamento {
         this.principioAtivo.add(farmaco);
     }
 
+    public void removerFarmaco(String nome){
+        for(int i = 0; i < this.principioAtivo.size(); i++){
+            if(this.principioAtivo.get(i).getNome().equals(nome)){
+                this.principioAtivo.remove(i);
+            }
+        }
+    }
+
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("""
