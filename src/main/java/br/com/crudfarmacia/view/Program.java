@@ -59,10 +59,9 @@ public class Program extends JFrame {
 	private JScrollPane painelListagem;
 	private JTable tblListagemMedicamento;
 	private Medicamento medicamento;
-	private static FarmaciaDao dao = new FarmaciaDao(EMfactory.getEntityManager());
+	private static FarmaciaDao dao;
 	private List<Medicamento> medicamentos;
 
-	// TODO arrumar a lógica do cadastro
 	public Program() {
 		components();
 	}
@@ -72,7 +71,12 @@ public class Program extends JFrame {
 		try {
 			UIManager.setLookAndFeel(new FlatMacLightLaf());
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
+		}
+		try {
+			dao = new FarmaciaDao(EMfactory.getEntityManager());
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Não foi possível conectar ao banco de dados");
 		}
 
 		medicamento = new Medicamento();
@@ -211,14 +215,15 @@ public class Program extends JFrame {
 				String nome = txtNomeFarmacoCadastrar.getText();
 				String strPeso = txtPesoFarmacoCadastrar.getText().replace(",", ".");
 
-				if(txtNomeCadastrarMedicamento.getText().equals("Medicamento (pressione ENTER para pesquisar)")
-				&& txtLaboratorioCadastrarMedicamento.getText().equals("Laboratório")){
-					JOptionPane.showMessageDialog(null, "Selecione ou preencha os dados do medicamento primeiro!");;
-				}else{
+				if (txtNomeCadastrarMedicamento.getText().equals("Medicamento (pressione ENTER para pesquisar)")
+						&& txtLaboratorioCadastrarMedicamento.getText().equals("Laboratório")) {
+					JOptionPane.showMessageDialog(null, "Selecione ou preencha os dados do medicamento primeiro!");
+					;
+				} else {
 					try {
 						double peso = Double.parseDouble(strPeso);
 						strPeso = String.format("%.2fmg", peso);
-	
+
 						if (contemFarmaco(nome)) {
 							for (int i = 0; i < farmacos.size(); i++) {
 								if (farmacos.get(i).getNome().equals(nome)) {
@@ -230,22 +235,21 @@ public class Program extends JFrame {
 							Farmaco farmaco = new Farmaco(nome, strPeso, medicamento);
 							farmacos.add(farmaco);
 						}
-	
+
 						tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacos));
-	
+
 						txtNomeFarmacoCadastrar.setText("Fármaco");
 						txtNomeFarmacoCadastrar.setForeground(Color.gray);
 						txtPesoFarmacoCadastrar.setText("Peso(mg)");
 						txtPesoFarmacoCadastrar.setForeground(Color.gray);
-	
+
 					} catch (Exception ex) {
 						JOptionPane.showMessageDialog(null, "Digite informações válidas!", "ERRO",
 								JOptionPane.ERROR_MESSAGE);
 						ex.printStackTrace();
-	
+
 					}
 				}
-				
 
 			}
 
@@ -262,38 +266,40 @@ public class Program extends JFrame {
 					txtNomeFarmacoCadastrar.setText(f.getNome());
 					txtPesoFarmacoCadastrar.setText(f.getPeso().replace("mg", ""));
 
-					tblFarmacosCadastro.addKeyListener(new KeyListener() {
-
-						@Override
-						public void keyTyped(KeyEvent e) {
-							// TODO Auto-generated method stub
-							throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
-						}
-
-						@Override
-						public void keyPressed(KeyEvent e) {
-							if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-								for (int i = 0; i < farmacos.size(); i++) {
-									if (farmacos.get(i).getNome().equals(f.getNome())) {
-										farmacos.remove(i);
-										tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacos));
-										txtNomeFarmacoCadastrar.setText("");
-										txtPesoFarmacoCadastrar.setText("");
-										break;
-									}
-								}
-							}
-						}
-
-						@Override
-						public void keyReleased(KeyEvent e) {
-							// TODO Auto-generated method stub
-							throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
-						}
-
-					});
+					//TODO ajeitar a lgc pq ta tirando tudo
 				}
 
+			}
+
+		});
+
+		tblFarmacosCadastro.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				throw new UnsupportedOperationException("Unimplemented method 'keyTyped'");
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					Farmaco f = farmacos.get(tblFarmacosCadastro.getSelectedRow());
+					for (int i = 0; i < farmacos.size(); i++) {
+						if (farmacos.get(i).getNome().equals(f.getNome())) {
+							farmacos.remove(i);
+							tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacos));
+							txtNomeFarmacoCadastrar.setText("");
+							txtPesoFarmacoCadastrar.setText("");
+							break;
+						}
+					}
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				throw new UnsupportedOperationException("Unimplemented method 'keyReleased'");
 			}
 
 		});
