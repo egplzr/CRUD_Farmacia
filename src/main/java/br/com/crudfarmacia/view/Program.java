@@ -3,7 +3,6 @@ package br.com.crudfarmacia.view;
 import java.awt.event.*;
 import java.util.ArrayList;
 
-import javax.print.attribute.standard.JobOriginatingUserName;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -94,12 +93,12 @@ public class Program extends JFrame {
 		painelCadastrarMedicamento.setVisible(true);
 
 		txtIdMedicamento = criarJTextField("Id", 50, 60, 50, 40);
-		txtIdMedicamento.setEnabled(false);
+		txtIdMedicamento.setEditable(true);
+		txtIdMedicamento.setEnabled(true);
 
 		txtNomeCadastrarMedicamento = criarJTextField("Medicamento (pressione ENTER para pesquisar)", 120, 60, 320, 40);
 
 		txtLaboratorioCadastrarMedicamento = criarJTextField("Laboratório", 50, 140, 390, 40);
-
 		lblCategoriaCadastrarMedicamento = criarJLabel("Categoria", 50, 220, 100, 40);
 		cmbCategoriasCadastrarMedicamento = new JComboBox();
 		cmbCategoriasCadastrarMedicamento.setBounds(130, 220, 150, 40);
@@ -387,6 +386,31 @@ public class Program extends JFrame {
 
 		});
 
+		txtIdMedicamento.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER){
+					try {
+						int id = Integer.parseInt(txtIdMedicamento.getText());	
+						medicamento = dao.buscar(id);
+						preencherCampos();
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(null, "Insira um valor válido!");
+					}
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+			
+		});
+
 		// adicionando components
 		getContentPane().add(fundo);
 		fundo.add(mnubar);
@@ -472,8 +496,10 @@ public class Program extends JFrame {
 	private void preencherCampos() {
 		if (medicamento != null) {
 			painelListagem.setVisible(false);
+			txtIdMedicamento.setEnabled(false);
 			txtIdMedicamento.setText(String.format("%d", medicamento.getId()));
 			txtNomeCadastrarMedicamento.setText(medicamento.getNome());
+			txtNomeCadastrarMedicamento.requestFocus();
 			txtLaboratorioCadastrarMedicamento.setText(medicamento.getLaboratorio());
 			cmbCategoriasCadastrarMedicamento.setSelectedItem(medicamento.getCategoria());
 			farmacos = medicamento.getPrincipioAtivo();
@@ -500,7 +526,7 @@ public class Program extends JFrame {
 		txtPesoFarmacoCadastrar.setText("Peso(mg)");
 		medicamento = new Medicamento();
 		farmacos = new ArrayList<>();
-
+		txtIdMedicamento.setEnabled(true);
 		tblFarmacosCadastro.setModel(new FarmacoTableModel(new ArrayList<>()));
 
 		for(Component c : painelCadastrarMedicamento.getComponents()){
@@ -508,5 +534,9 @@ public class Program extends JFrame {
 				c.setForeground(Color.GRAY);
 			}
 		}
+	}
+
+	public static void main(String[] args) {
+		new Program();
 	}
 }

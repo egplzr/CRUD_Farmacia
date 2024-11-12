@@ -137,6 +137,7 @@ public class Login extends JFrame{
 				if(usuario != null){
 					if(usuario.getCpf().equals(cpf) && usuario.getSenha().equals(senha)){
 						new Program();
+						dispose();
 					}else{
 						JOptionPane.showMessageDialog(null, "Senha incorreta!", "ERRO", JOptionPane.ERROR_MESSAGE);
 					}

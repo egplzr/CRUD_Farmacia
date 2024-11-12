@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
@@ -24,19 +25,22 @@ import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 
+import br.com.crudfarmacia.dao.EMfactory;
+import br.com.crudfarmacia.dao.UsuarioDao;
 import br.com.crudfarmacia.model.Medicamento;
 import br.com.crudfarmacia.model.Usuario;
 import br.com.crudfarmacia.tablemodel.FarmacoTableModel;
 
-public class Cadastro extends JFrame{
+public class Cadastro extends JFrame {
     private JLabel tituloCadastro;
     private JTextField txtCpf;
     private JTextField txtSenha;
     private JButton btnCadastrar;
     private JLabel direcionarLogin;
     private Usuario usuario;
+    private UsuarioDao dao = new UsuarioDao(EMfactory.getEntityManager());
 
-    public Cadastro(){
+    public Cadastro() {
         component();
     }
 
@@ -101,6 +105,14 @@ public class Cadastro extends JFrame{
 			
 		});
 
+        btnCadastrar.addActionListener(e -> {
+            try {
+                fazerCadastro();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        });
+
         //adicionar componentes
         add(tituloCadastro);
         add(txtCpf);
@@ -111,87 +123,105 @@ public class Cadastro extends JFrame{
         setVisible(true);
     }
 
-    private void centralizarComponente(Component c){
+    private void fazerCadastro() throws Exception {
+        String cpf = txtCpf.getText();
+        String senha = txtSenha.getText();
+
+        if (cpf.equals("Cpf") || senha.equals("")) {
+            JOptionPane.showMessageDialog(null, "Preencha os campos para continuar!");
+        } else {
+            if (true) { // TODO completar com a lógica de validar cpf
+                usuario = dao.buscar(cpf);
+
+                if (usuario != null) {
+                    JOptionPane.showMessageDialog(null, "Usuário já cadastrado!", "ERRO", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    usuario = new Usuario(cpf, senha);
+                    dao.inserir(usuario);
+                    limpar();
+                    JOptionPane.showMessageDialog(null, "Usuário cadastrado!", "ERRO", JOptionPane.PLAIN_MESSAGE);
+                }
+            }
+        }
+    }
+
+    private void centralizarComponente(Component c) {
         int widht = c.getWidth();
         int centro = ((getWidth() - widht) / 2);
         c.setLocation(centro, c.getY());
     }
 
     private void limpar() {
-		txtCpf.setText("Rg");
-		txtSenha.setText("Senha");
-		usuario = new Usuario();
+        txtCpf.setText("Rg");
+        txtSenha.setText("Senha");
+        usuario = new Usuario();
 
-		for(Component c : getContentPane().getComponents()){
-			if(c.getClass() == JTextField.class){
-				c.setForeground(Color.GRAY);
-			}
-		}
-	}
+        for (Component c : getContentPane().getComponents()) {
+            if (c.getClass() == JTextField.class) {
+                c.setForeground(Color.GRAY);
+            }
+        }
+    }
 
     private JTextField criarJTextField(String placeholder, int dEsq, int dTopo, int width, int heigth) {
-		JTextField tf = new JTextField();
-		tf.setBounds(dEsq, dTopo, width, heigth);
-		tf.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
-		tf.setText(placeholder);
-		tf.setForeground(Color.gray);
+        JTextField tf = new JTextField();
+        tf.setBounds(dEsq, dTopo, width, heigth);
+        tf.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
+        tf.setText(placeholder);
+        tf.setForeground(Color.gray);
 
-		tf.addFocusListener(new FocusListener() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				if (tf.getText().equals(placeholder)) {
-					tf.setText("");
-					tf.setForeground(Color.black);
-				}
-			}
+        tf.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (tf.getText().equals(placeholder)) {
+                    tf.setText("");
+                    tf.setForeground(Color.black);
+                }
+            }
 
-			@Override
-			public void focusLost(FocusEvent e) {
-				if (tf.getText().equals("")) {
-					tf.setText(placeholder);
-					tf.setForeground(Color.gray);
-				}
-			}
-		});
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (tf.getText().equals("")) {
+                    tf.setText(placeholder);
+                    tf.setForeground(Color.gray);
+                }
+            }
+        });
 
-		tf.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				tf.setForeground(Color.black);
-			}
+        tf.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                tf.setForeground(Color.black);
+            }
 
-			@Override
-			public void removeUpdate(DocumentEvent e) {
+            @Override
+            public void removeUpdate(DocumentEvent e) {
 
-			}
+            }
 
-			@Override
-			public void changedUpdate(DocumentEvent e) {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
 
-			}
-		});
+            }
+        });
 
-		return tf;
-	}
-    
+        return tf;
+    }
+
     private JLabel criarJLabel(String txt, int dEsq, int dTopo, int width, int heigth) {
-		JLabel lbl = new JLabel(txt);
-		lbl.setBounds(dEsq, dTopo, width, heigth);
-		lbl.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
+        JLabel lbl = new JLabel(txt);
+        lbl.setBounds(dEsq, dTopo, width, heigth);
+        lbl.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
 
-		return lbl;
+        return lbl;
 
-	}
+    }
 
     private JButton criarButton(String txt, int dEsq, int dTopo, int width, int heigth) {
-		JButton b = new JButton(txt);
-		b.setBounds(dEsq, dTopo, width, heigth);
-		b.setCursor(new Cursor(HAND_CURSOR));
-		b.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
-		return b;
-	}
-
-    public static void main(String[] args) {
-        new Cadastro();
+        JButton b = new JButton(txt);
+        b.setBounds(dEsq, dTopo, width, heigth);
+        b.setCursor(new Cursor(HAND_CURSOR));
+        b.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
+        return b;
     }
 }
