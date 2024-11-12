@@ -5,44 +5,38 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
-import javax.print.attribute.standard.JobOriginatingUserName;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.w3c.dom.events.MouseEvent;
+
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 
-import br.com.crudfarmacia.dao.EMfactory;
-import br.com.crudfarmacia.dao.UsuarioDao;
 import br.com.crudfarmacia.model.Medicamento;
 import br.com.crudfarmacia.model.Usuario;
 import br.com.crudfarmacia.tablemodel.FarmacoTableModel;
 
-public class Login extends JFrame{
-    private JLabel tituloLogin;
+public class Cadastro extends JFrame{
+    private JLabel tituloCadastro;
     private JTextField txtCpf;
     private JTextField txtSenha;
-    private JButton btnLogin;
-    private JLabel direcionarCadastro;
+    private JButton btnCadastrar;
+    private JLabel direcionarLogin;
     private Usuario usuario;
-	private UsuarioDao dao = new UsuarioDao(EMfactory.getEntityManager());
 
-    public Login(){
+    public Cadastro(){
         component();
     }
 
@@ -61,94 +55,61 @@ public class Login extends JFrame{
         getContentPane().setBackground(Color.WHITE);
 
         //criando components
-        tituloLogin = criarJLabel("Login", 0, 30, 100, 40);
-        centralizarComponente(tituloLogin);
-        tituloLogin.setFont(new Font("Helvetica Neue", Font.BOLD, 30));
+        tituloCadastro = criarJLabel("Cadastro", 0, 30, 150, 40);
+        centralizarComponente(tituloCadastro);
+        tituloCadastro.setFont(new Font("Helvetica Neue", Font.BOLD, 30));
 
         txtCpf = criarJTextField("Cpf", 45, 110, 300, 40);
 
         txtSenha = criarJTextField("Senha",45 , 180, 300, 40);
 
-        btnLogin = criarButton("Entrar", 95, 270, 200, 40);
+        btnCadastrar = criarButton("Cadastrar", 95, 270, 200, 40);
 
-        direcionarCadastro = criarJLabel("Não possui login? Faça cadastro.", 0, 400, 190, 40);
-        centralizarComponente(direcionarCadastro);
-        direcionarCadastro.setFont(new Font("Helvetica Neue", Font.PLAIN, 12));
-		direcionarCadastro.setCursor(new Cursor(HAND_CURSOR));
+        direcionarLogin = criarJLabel("Já possui cadastro? Faça Login.", 0, 400, 190, 40);
+        centralizarComponente(direcionarLogin);
+        direcionarLogin.setFont(new Font("Helvetica Neue", Font.PLAIN, 12));
 
-		//actions
-		btnLogin.addActionListener(e -> {
-			try {
-				fazerLogin();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-		});
+        //actions
+        direcionarLogin.addMouseListener(new MouseListener() {
 
-		direcionarCadastro.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                new Login();
+                dispose();
 
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				new Cadastro();
-				dispose();
-			}
+            }
 
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'mousePressed'");
+            }
 
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				
-			}
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+            }
 
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				direcionarCadastro.setForeground(Color.blue);
-			}
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                direcionarLogin.setForeground(Color.black);
+            }
 
-			@Override
-			public void mouseExited(MouseEvent e) {
-				direcionarCadastro.setForeground(Color.black);
-			}
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                direcionarLogin.setForeground(Color.blue);
+            }
 			
 		});
 
         //adicionar componentes
-        add(tituloLogin);
+        add(tituloCadastro);
         add(txtCpf);
         add(txtSenha);
-        add(btnLogin);
-        add(direcionarCadastro);
+        add(btnCadastrar);
+        add(direcionarLogin);
 
         setVisible(true);
     }
-
-	private void fazerLogin() throws Exception{
-		String cpf = txtCpf.getText();
-		String senha = txtSenha.getText();
-
-		if(cpf.equals("Cpf") || senha.equals("")){
-			JOptionPane.showMessageDialog(null, "Preencha os campos para continuar!");
-		}else{
-			if(true){ //TODO completar com a lógica de validar cpf
-				usuario = dao.buscar(cpf);
-				
-				if(usuario != null){
-					if(usuario.getCpf().equals(cpf) && usuario.getSenha().equals(senha)){
-						new Program();
-					}else{
-						JOptionPane.showMessageDialog(null, "Senha incorreta!", "ERRO", JOptionPane.ERROR_MESSAGE);
-					}
-				}else{
-					JOptionPane.showMessageDialog(null, "Usuário não existe!", "ERRO", JOptionPane.ERROR_MESSAGE);
-				}
-	
-			}else{
-				JOptionPane.showMessageDialog(null, "Esse cpf não é válido!", "ERRO", JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
 
     private void centralizarComponente(Component c){
         int widht = c.getWidth();
@@ -231,6 +192,6 @@ public class Login extends JFrame{
 	}
 
     public static void main(String[] args) {
-        new Login();
+        new Cadastro();
     }
 }

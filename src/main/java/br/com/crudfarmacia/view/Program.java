@@ -52,7 +52,7 @@ public class Program extends JFrame {
 	private JScrollPane painelListagem;
 	private JTable tblListagemMedicamento;
 	private Medicamento medicamento;
-	private static FarmaciaDao dao;
+	private FarmaciaDao dao;
 	private List<Medicamento> medicamentos;
 
 	public Program() {
