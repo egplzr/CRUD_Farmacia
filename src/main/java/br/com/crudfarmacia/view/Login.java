@@ -131,24 +131,29 @@ public class Login extends JFrame{
 		if(cpf.equals("Cpf") || senha.equals("")){
 			JOptionPane.showMessageDialog(null, "Preencha os campos para continuar!");
 		}else{
-			if(true){ //TODO completar com a lógica de validar cpf
-				usuario = dao.buscar(cpf);
-				
-				if(usuario != null){
-					if(usuario.getCpf().equals(cpf) && usuario.getSenha().equals(senha)){
-						new Program();
-						dispose();
-					}else{
-						JOptionPane.showMessageDialog(null, "Senha incorreta!", "ERRO", JOptionPane.ERROR_MESSAGE);
-					}
-				}else{
-					JOptionPane.showMessageDialog(null, "Usuário não existe!", "ERRO", JOptionPane.ERROR_MESSAGE);
-				}
-	
+			if(cpf.equals("admin") && senha.equals("123")){
+				new PaginaAdministrador();
+				dispose();
 			}else{
-				JOptionPane.showMessageDialog(null, "Esse cpf não é válido!", "ERRO", JOptionPane.ERROR_MESSAGE);
+				if(true){ //TODO completar com a lógica de validar cpf
+					usuario = dao.buscar(cpf);
+					
+					if(usuario != null){
+						if(usuario.getCpf().equals(cpf) && usuario.getSenha().equals(senha)){
+							new Program();
+							dispose();
+						}else{
+							JOptionPane.showMessageDialog(null, "Senha incorreta!", "ERRO", JOptionPane.ERROR_MESSAGE);
+						}
+					}else{
+						JOptionPane.showMessageDialog(null, "Usuário não existe!", "ERRO", JOptionPane.ERROR_MESSAGE);
+					}
+		
+				}else{
+					JOptionPane.showMessageDialog(null, "Esse cpf não é válido!", "ERRO", JOptionPane.ERROR_MESSAGE);
+				}
 			}
-		}
+			}
 	}
 
     private void centralizarComponente(Component c){

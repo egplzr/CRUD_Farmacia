@@ -53,7 +53,9 @@ public class UsuarioDao{
 
 
     public List<Usuario> listar() throws Exception {
-        TypedQuery<Usuario> query = this.manager.createQuery("select u from Usuario m order by u.nome", Usuario.class);
+        this.manager.getTransaction().begin();
+        TypedQuery<Usuario> query = this.manager.createQuery("select m from Usuario m order by m.cpf", Usuario.class);
+        this.manager.getTransaction().commit();
         return query.getResultList();
     }
     
