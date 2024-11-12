@@ -1,8 +1,10 @@
 package br.com.util;
 
 public class Validador {
-    
-    public boolean String validarCpf(String txt){
+    private static int[] numValidar;
+    private static int finalNum = 0;
+
+    public static boolean validarCpf(String txt){
         formatar(txt);
 
         //Validando primeiro digito verificador
@@ -44,7 +46,7 @@ public class Validador {
     }
 
     private static void formatar(String txt){
-        int[] numValidar = new int[txt.length()];
+        numValidar = new int[txt.length()];
 
         StringBuilder sb = new StringBuilder();
         for(char c : txt.toCharArray()) {

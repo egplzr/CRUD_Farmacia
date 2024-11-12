@@ -30,6 +30,7 @@ import br.com.crudfarmacia.dao.UsuarioDao;
 import br.com.crudfarmacia.model.Medicamento;
 import br.com.crudfarmacia.model.Usuario;
 import br.com.crudfarmacia.tablemodel.FarmacoTableModel;
+import br.com.util.Validador;
 
 public class Cadastro extends JFrame {
     private JLabel tituloCadastro;
@@ -130,7 +131,7 @@ public class Cadastro extends JFrame {
         if (cpf.equals("Cpf") || senha.equals("")) {
             JOptionPane.showMessageDialog(null, "Preencha os campos para continuar!");
         } else {
-            if (true) { // TODO completar com a lógica de validar cpf
+            if (Validador.validarCpf(cpf)) { // TODO completar com a lógica de validar cpf
                 usuario = dao.buscar(cpf);
 
                 if (usuario != null) {
@@ -139,8 +140,10 @@ public class Cadastro extends JFrame {
                     usuario = new Usuario(cpf, senha);
                     dao.inserir(usuario);
                     limpar();
-                    JOptionPane.showMessageDialog(null, "Usuário cadastrado!", "ERRO", JOptionPane.PLAIN_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Usuário cadastrado!", "", JOptionPane.PLAIN_MESSAGE);
                 }
+            }else{
+                JOptionPane.showMessageDialog(null, "Esse cpf não é válido!", "ERRO", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

@@ -32,6 +32,7 @@ import br.com.crudfarmacia.dao.UsuarioDao;
 import br.com.crudfarmacia.model.Medicamento;
 import br.com.crudfarmacia.model.Usuario;
 import br.com.crudfarmacia.tablemodel.FarmacoTableModel;
+import br.com.util.Validador;
 
 public class Login extends JFrame{
     private JLabel tituloLogin;
@@ -135,7 +136,7 @@ public class Login extends JFrame{
 				new PaginaAdministrador();
 				dispose();
 			}else{
-				if(true){ //TODO completar com a lógica de validar cpf
+				if(Validador.validarCpf(cpf)){
 					usuario = dao.buscar(cpf);
 					
 					if(usuario != null){

@@ -9,7 +9,7 @@ import br.com.crudfarmacia.model.Medicamento;
 
 public class MedicamentoTableModel extends AbstractTableModel {
     private List<Medicamento> medicamentos;
-    private String[] cabecalho = {"Nome", "Laboratório", "Categoria"};
+    private String[] cabecalho = {"Id", "Nome", "Laboratório", "Categoria"};
 
     public MedicamentoTableModel(List<Medicamento> medicamentos){
         this.medicamentos = medicamentos;
@@ -31,10 +31,12 @@ public class MedicamentoTableModel extends AbstractTableModel {
 
         switch (columnIndex) {
             case 0:
-                return m.getNome();
+                return m.getId();
             case 1:
-                return m.getLaboratorio();
+                return m.getNome();
             case 2:
+                return m.getLaboratorio();
+            case 3:
                 return m.getCategoria();
             default:
                 return null;

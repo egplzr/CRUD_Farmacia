@@ -535,8 +535,4 @@ public class Program extends JFrame {
 			}
 		}
 	}
-
-	public static void main(String[] args) {
-		new Program();
-	}
 }

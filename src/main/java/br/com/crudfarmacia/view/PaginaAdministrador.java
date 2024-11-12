@@ -231,8 +231,4 @@ public class PaginaAdministrador extends JFrame {
         b.setFont(new Font("Helvetica Neue", Font.PLAIN, 15));
         return b;
     }
-
-    public static void main(String[] args) {
-        new PaginaAdministrador();
-    }
 }
