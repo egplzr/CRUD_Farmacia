@@ -52,7 +52,12 @@ public class Program extends JFrame {
 	private JTable tblListagemMedicamento;
 	private Medicamento medicamento;
 	private FarmaciaDao dao;
+	private Farmaco farmaco;
 	private List<Medicamento> medicamentos;
+
+	public static void main(String[] args) {
+		new Program();
+	}
 
 	public Program() {
 		components();
@@ -66,11 +71,11 @@ public class Program extends JFrame {
 			e.printStackTrace();
 		}
 
-		
 		try {
 			dao = new FarmaciaDao(EMfactory.getEntityManager());
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Não foi possível conectar ao banco de dados", "ERRO", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Não foi possível conectar ao banco de dados", "ERRO",
+					JOptionPane.ERROR_MESSAGE);
 		}
 
 		medicamento = new Medicamento();
@@ -161,7 +166,8 @@ public class Program extends JFrame {
 						medicamentos = dao.listar();
 						tblListagemMedicamento.setModel(new MedicamentoTableModel(medicamentos));
 					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(null, "Não foi possível listar os medicamentos", "ERRO", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(null, "Não foi possível listar os medicamentos", "ERRO",
+								JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
@@ -178,7 +184,8 @@ public class Program extends JFrame {
 						medicamento = dao.buscar(nomeMedicamento);
 						preencherCampos();
 					} catch (Exception ex) {
-						JOptionPane.showMessageDialog(null, "Usuário não encontrado", "ERRO", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(null, "Usuário não encontrado", "ERRO",
+								JOptionPane.ERROR_MESSAGE);
 						ex.printStackTrace();
 					}
 				} else {
@@ -208,23 +215,20 @@ public class Program extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				String nome = txtNomeFarmacoCadastrar.getText();
 				String strPeso = txtPesoFarmacoCadastrar.getText().replace(",", ".");
+				int linha = tblFarmacosCadastro.getSelectedRow();
 
 				if (txtNomeCadastrarMedicamento.getText().equals("Medicamento (pressione ENTER para pesquisar)")
 						&& txtLaboratorioCadastrarMedicamento.getText().equals("Laboratório")) {
-					JOptionPane.showMessageDialog(null, "Selecione ou preencha os dados do medicamento primeiro!", "ERRO", JOptionPane.ERROR_MESSAGE);
-					;
+					JOptionPane.showMessageDialog(null, "Selecione ou preencha os dados do medicamento primeiro!",
+							"ERRO", JOptionPane.ERROR_MESSAGE);
 				} else {
 					try {
 						double peso = Double.parseDouble(strPeso);
 						strPeso = String.format("%.2fmg", peso);
 
-						if (contemFarmaco(nome)) {
-							for (int i = 0; i < farmacos.size(); i++) {
-								if (farmacos.get(i).getNome().equals(nome)) {
-									farmacos.get(i).setNome(nome);
-									farmacos.get(i).setPeso(strPeso);
-								}
-							}
+						if (linha >= 0) {
+							farmacos.get(linha).setNome(nome);
+							farmacos.get(linha).setPeso(strPeso);
 						} else {
 							Farmaco farmaco = new Farmaco(nome, strPeso, medicamento);
 							farmacos.add(farmaco);
@@ -281,6 +285,11 @@ public class Program extends JFrame {
 							tblFarmacosCadastro.setModel(new FarmacoTableModel(farmacos));
 							txtNomeFarmacoCadastrar.setText("");
 							txtPesoFarmacoCadastrar.setText("");
+
+							txtNomeFarmacoCadastrar.setText("Fármaco");
+							txtNomeFarmacoCadastrar.setForeground(Color.gray);
+							txtPesoFarmacoCadastrar.setText("Peso(mg)");
+							txtPesoFarmacoCadastrar.setForeground(Color.gray);
 							break;
 						}
 					}
@@ -305,7 +314,8 @@ public class Program extends JFrame {
 				if (!nome.equals("Medicamento (pressione ENTER para pesquisar)")
 						&& !laboratorio.equals("Laboratório")) {
 					if (farmacos.size() == 0) {
-						JOptionPane.showMessageDialog(null, "Adicione ao menos 1 farmaco para salvar", "ERRO", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(null, "Adicione ao menos 1 farmaco para salvar", "ERRO",
+								JOptionPane.ERROR_MESSAGE);
 					} else {
 						if (id.equals("") || id.equals("Id")) {
 							try {
@@ -336,7 +346,8 @@ public class Program extends JFrame {
 								farmacos = new ArrayList<>();
 
 							} catch (Exception e1) {
-								JOptionPane.showMessageDialog(null, "Não foi possível atualizar o medicamento", "ERRO", JOptionPane.ERROR_MESSAGE);
+								JOptionPane.showMessageDialog(null, "Não foi possível atualizar o medicamento", "ERRO",
+										JOptionPane.ERROR_MESSAGE);
 							}
 							try {
 								tblListagemMedicamento.setModel(new MedicamentoTableModel(dao.listar()));
@@ -348,7 +359,8 @@ public class Program extends JFrame {
 					}
 
 				} else {
-					JOptionPane.showMessageDialog(null, "Preencha os campos vazios!", "ERRO", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "Preencha os campos vazios!", "ERRO",
+							JOptionPane.ERROR_MESSAGE);
 				}
 
 			}
@@ -394,9 +406,9 @@ public class Program extends JFrame {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER){
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					try {
-						int id = Integer.parseInt(txtIdMedicamento.getText());	
+						int id = Integer.parseInt(txtIdMedicamento.getText());
 						medicamento = dao.buscar(id);
 						preencherCampos();
 					} catch (Exception e1) {
@@ -408,7 +420,7 @@ public class Program extends JFrame {
 			@Override
 			public void keyReleased(KeyEvent e) {
 			}
-			
+
 		});
 
 		// adicionando components
@@ -529,8 +541,8 @@ public class Program extends JFrame {
 		txtIdMedicamento.setEnabled(true);
 		tblFarmacosCadastro.setModel(new FarmacoTableModel(new ArrayList<>()));
 
-		for(Component c : painelCadastrarMedicamento.getComponents()){
-			if(c.getClass() == JTextField.class){
+		for (Component c : painelCadastrarMedicamento.getComponents()) {
+			if (c.getClass() == JTextField.class) {
 				c.setForeground(Color.GRAY);
 			}
 		}

@@ -158,7 +158,7 @@ public class PaginaAdministrador extends JFrame {
     }
 
     private void limpar() {
-        txtCpfUsuario.setText("Rg");
+        txtCpfUsuario.setText("Cpf");
         txtCpfUsuario.setEnabled(true);
         txtSenhaUsuario.setText("Senha");
         usuario = new Usuario();
