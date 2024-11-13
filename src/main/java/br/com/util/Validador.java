@@ -2,62 +2,69 @@ package br.com.util;
 
 public class Validador {
     private static int[] numValidar;
-    private static int finalNum = 0;
 
-    public static boolean validarCpf(String txt){
+    public static boolean validarCpf(String txt) {
         formatar(txt);
 
-        //Validando primeiro digito verificador
-        int[] pesos = {10,9,8,7,6,5,4,3,2};
-
-        for (int i = 0; i < pesos.length; i++) {
-            finalNum += numValidar[i] * pesos[i];
-        }
-
-        int rest = finalNum %11;
-
-        if (rest < 2) {
-            if (!(numValidar[9] == 0)){
-                return true;
-            }
-        } else if (!(numValidar[9] == 11 -rest)){
+        if (numValidar.length != 11) {
             return false;
         }
 
-        //Validando segundo digito verificador;
-        pesos = new int[]{11,10,9,8,7,6,5,4,3,2};
-        finalNum = 0;
-
-        for (int i = 0; i < pesos.length; i++) {
-            finalNum += numValidar[i] * pesos[i];
-        }
-
-        rest = finalNum %11;
-
-        if (rest < 2) {
-            if (!(numValidar[10] == 0)){
-                return true;
+        boolean digitosIguais = true;
+        for (int i = 1; i < numValidar.length; i++) {
+            if (numValidar[i] != numValidar[0]) {
+                digitosIguais = false;
+                break;
             }
-        } else if (!(numValidar[10] == 11 -rest)){
+        }
+        if (digitosIguais) {
             return false;
         }
 
-        return true;
+        int soma = 0;
+        int[] pesos = {10, 9, 8, 7, 6, 5, 4, 3, 2};
+
+        for (int i = 0; i < pesos.length; i++) {
+            soma += numValidar[i] * pesos[i];
+        }
+
+        int resto = soma % 11;
+        int primeiroDigitoVerificador = (resto < 2) ? 0 : 11 - resto;
+
+        if (numValidar[9] != primeiroDigitoVerificador) {
+            return false;
+        }
+
+        soma = 0;
+        pesos = new int[]{11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
+
+        for (int i = 0; i < pesos.length; i++) {
+            soma += numValidar[i] * pesos[i];
+        }
+
+        resto = soma % 11;
+        int segundoDigitoVerificador = (resto < 2) ? 0 : 11 - resto;
+
+        return numValidar[10] == segundoDigitoVerificador;
     }
 
-    private static void formatar(String txt){
-        numValidar = new int[txt.length()];
-
+    private static void formatar(String txt) {
+        numValidar = new int[11];
         StringBuilder sb = new StringBuilder();
-        for(char c : txt.toCharArray()) {
-            if(Character.isDigit(c)){
+
+        for (char c : txt.toCharArray()) {
+            if (Character.isDigit(c)) {
                 sb.append(c);
             }
         }
 
-        for (int i = 0; i < sb.toString().length(); i++) {
-            numValidar[i] = Character.getNumericValue(sb.toString().charAt(i));
+        if (sb.length() != 11) {
+            numValidar = new int[0];
+            return;
         }
 
+        for (int i = 0; i < 11; i++) {
+            numValidar[i] = Character.getNumericValue(sb.charAt(i));
+        }
     }
 }

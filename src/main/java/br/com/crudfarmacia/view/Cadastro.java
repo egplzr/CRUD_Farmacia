@@ -155,7 +155,7 @@ public class Cadastro extends JFrame {
     }
 
     private void limpar() {
-        txtCpf.setText("Rg");
+        txtCpf.setText("Cpf");
         txtSenha.setText("Senha");
         usuario = new Usuario();
 

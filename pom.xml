@@ -15,11 +15,11 @@
 	</properties>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
+		<!--  https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core  -->
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>6.6.1.Final</version>
+			<version>6.4.10.Final</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->

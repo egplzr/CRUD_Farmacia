@@ -1,15 +1,9 @@
 package br.com.crudfarmacia.dao;
 
 import java.util.List;
-
-import javax.swing.text.html.parser.Entity;
-
-import org.hibernate.query.TypedParameterValue;
-
 import br.com.crudfarmacia.model.Usuario;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import lombok.var;
 
 public class UsuarioDao{
     private final EntityManager manager;
